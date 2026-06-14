@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: libri
+      POSTGRES_PASSWORD: libri
+      POSTGRES_DB: libri
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  api:
+    image: ghcr.io/masiama/libri-api:${API_TAG:-latest}
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: libri
+      DB_USER: libri
+      DB_PASS: libri
+      REDIS_URL: redis://redis:6379
+      IMAGES_DIR: /images
+      CLERK_JWKS_URL: ${CLERK_JWKS_URL}
+    depends_on: [postgres, redis]
+    user: "0:0"
+    ports:
+      - "8080:8080"
+    volumes:
+      - images:/images
+
+  crawler:
+    image: ghcr.io/masiama/libri-crawler:${CRAWLER_TAG:-latest}
+    environment:
+      REDIS_URL: redis://redis:6379
+      IMAGES_DIR: /images
+    depends_on: [redis]
+    user: "0:0"
+    volumes:
+      - images:/images
+
+volumes:
+  pg_data:
+  images:
