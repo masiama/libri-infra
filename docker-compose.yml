@@ -43,6 +43,16 @@ services:
     volumes:
       - images:/images
 
+  admin:
+    image: ghcr.io/masiama/libri-admin:${ADMIN_TAG:-latest}
+    environment:
+      VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY}
+      VITE_CLERK_JWT_TEMPLATE: ${VITE_CLERK_JWT_TEMPLATE}
+      VITE_SENTRY_DSN: ${VITE_SENTRY_DSN}
+    depends_on: [api]
+    ports:
+      - "3000:80"
+
 volumes:
   pg_data:
   images:
