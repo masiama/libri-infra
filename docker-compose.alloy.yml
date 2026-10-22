@@ -1,0 +1,31 @@
+services:
+  alloy:
+    image: grafana/alloy:v1.21.0
+    hostname: ${ALLOY_HOST}
+    command: run --storage.path=/var/lib/alloy/data /etc/alloy/libri
+    environment:
+      ALLOY_HOST: ${ALLOY_HOST}
+      GRAFANA_CLOUD_PROMETHEUS_URL: ${GRAFANA_CLOUD_PROMETHEUS_URL}
+      GRAFANA_CLOUD_USER: ${GRAFANA_CLOUD_USER}
+      GRAFANA_CLOUD_TOKEN: ${GRAFANA_CLOUD_TOKEN}
+      POSTGRES_DSN: postgresql://libri:${DB_PASS:-libri}@postgres:5432/libri?sslmode=disable
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    volumes:
+      # Drop api.alloy on a host without the API, db.alloy on a host without Postgres and Redis
+      - ./monitoring/common.alloy:/etc/alloy/libri/common.alloy:ro
+      - ./monitoring/api.alloy:/etc/alloy/libri/api.alloy:ro
+      - ./monitoring/db.alloy:/etc/alloy/libri/db.alloy:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /run/udev/data:/run/udev/data:ro
+      - /:/rootfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /run/containerd/containerd.sock:/run/containerd/containerd.sock:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - alloy_data:/var/lib/alloy/data
+    mem_limit: 150m
+    cgroup: host
+    restart: unless-stopped
+
+volumes:
+  alloy_data:

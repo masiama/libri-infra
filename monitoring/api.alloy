@@ -1,0 +1,9 @@
+// Loaded on the host that runs libri-api: scrapes its private management port.
+
+prometheus.scrape "api" {
+  targets         = [{"__address__" = coalesce(sys.env("API_METRICS_ADDR"), "api:8081")}]
+  metrics_path    = "/actuator/prometheus"
+  job_name        = "libri-api"
+  scrape_interval = "60s"
+  forward_to      = [prometheus.remote_write.cloud.receiver]
+}

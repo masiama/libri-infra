@@ -94,3 +94,37 @@ See [`.env.example`](.env.example) for all configurable values:
 | `VITE_CLERK_PUBLISHABLE_KEY` | Clerk publishable key (admin)                   | _required_ |
 | `VITE_CLERK_JWT_TEMPLATE`    | Clerk JWT template name (admin)                 | _required_ |
 | `VITE_SENTRY_DSN`            | Sentry DSN for error reporting (admin)          | _required_ |
+
+## Monitoring
+
+Grafana Alloy collects host, container, API, Postgres and Redis metrics and
+pushes them to Grafana Cloud (free tier). The plan and dashboard design are in
+`docs/monitoring.md` in the parent workspace.
+
+1. Fill the monitoring variables in `.env` (see [`.env.example`](.env.example)):
+
+   | Variable                       | Description                                                      |
+   | ------------------------------ | ---------------------------------------------------------------- |
+   | `ALLOY_HOST`                   | `host` label on every series (`oracle-app`, `oracle-db`, `mac`) |
+   | `GRAFANA_CLOUD_PROMETHEUS_URL` | Prometheus remote-write URL of the Grafana Cloud stack           |
+   | `GRAFANA_CLOUD_USER`           | Prometheus user ID of the stack                                  |
+   | `GRAFANA_CLOUD_TOKEN`          | Access policy token with `metrics:write`                         |
+
+2. Start Alloy next to the stack:
+
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.alloy.yml up -d
+   ```
+
+Config files in [`monitoring/`](monitoring):
+
+- `common.alloy`: host and container metrics, the Grafana Cloud push. Every host.
+- `api.alloy`: scrapes the API's private management port (`api:8081`).
+- `db.alloy`: Postgres and Redis exporters.
+
+Alloy loads every `.alloy` file mounted into `/etc/alloy/libri`. On a host with only
+the API (or only the DB), remove the other file's mount line from the Alloy
+service.
+
+On macOS, run Alloy natively (Homebrew), not in Docker: inside Docker it sees
+OrbStack's VM, not the Mac and its disks.

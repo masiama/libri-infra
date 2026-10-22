@@ -1,0 +1,22 @@
+// Loaded on the host that runs Postgres and Redis.
+
+prometheus.exporter.postgres "db" {
+  data_source_names = [sys.env("POSTGRES_DSN")]
+}
+
+prometheus.scrape "postgres" {
+  targets         = prometheus.exporter.postgres.db.targets
+  scrape_interval = "60s"
+  forward_to      = [prometheus.remote_write.cloud.receiver]
+}
+
+prometheus.exporter.redis "redis" {
+  redis_addr     = "redis:6379"
+  redis_password = sys.env("REDIS_PASSWORD")
+}
+
+prometheus.scrape "redis" {
+  targets         = prometheus.exporter.redis.redis.targets
+  scrape_interval = "60s"
+  forward_to      = [prometheus.remote_write.cloud.receiver]
+}
