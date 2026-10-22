@@ -240,7 +240,7 @@ groups:
               datasourceUid: grafanacloud-prom
               model:
                 editorMode: code
-                expr: count by (host) (max_over_time(node_uname_info[1d])) unless count by (host) (node_uname_info)
+                expr: count by (host) (max_over_time(up[1d])) unless count by (host) (up)
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
@@ -280,6 +280,60 @@ groups:
             summary: '{{ $labels.host }} stopped sending metrics'
           labels:
             severity: critical
+          isPaused: false
+          notification_settings:
+            receiver: email
+        - uid: fg20y0wjn52psf
+          title: Metrics scrape failing
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: grafanacloud-prom
+              model:
+                editorMode: code
+                expr: min by (host, job) (up)
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              queryType: expression
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 1
+                        type: lt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          noDataState: OK
+          execErrState: Error
+          for: 15m
+          annotations:
+            summary: '{{ $labels.job }} on {{ $labels.host }} keeps failing to scrape'
+          labels:
+            severity: warning
           isPaused: false
           notification_settings:
             receiver: email
