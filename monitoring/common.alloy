@@ -24,6 +24,7 @@ prometheus.exporter.unix "host" {
 prometheus.scrape "host" {
   targets         = prometheus.exporter.unix.host.targets
   scrape_interval = "60s"
+  scrape_timeout  = "30s"
   forward_to      = [prometheus.remote_write.cloud.receiver]
 }
 
@@ -32,11 +33,13 @@ prometheus.exporter.cadvisor "containers" {
   docker_host      = "unix:///var/run/docker.sock"
   docker_only      = true
   storage_duration = "5m"
+  enabled_metrics = ["cpu", "memory", "network", "diskIO"]
 }
 
 prometheus.scrape "containers" {
   targets         = prometheus.exporter.cadvisor.containers.targets
   scrape_interval = "60s"
+  scrape_timeout  = "30s"
   forward_to      = [prometheus.relabel.containers.receiver]
 }
 
