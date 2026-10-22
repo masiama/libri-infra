@@ -1,0 +1,285 @@
+apiVersion: 1
+groups:
+    - orgId: 1
+      name: libri
+      folder: Libri
+      interval: 1m
+      rules:
+        - uid: bg20943v2hqtcd
+          title: Disk almost full
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: grafanacloud-prom
+              model:
+                editorMode: code
+                expr: 100 * (1 - max by (host, mountpoint) (node_filesystem_avail_bytes{fstype!~"tmpfs|vfat|overlay|squashfs",mountpoint!~"/boot.*"}) / max by (host, mountpoint) (node_filesystem_size_bytes{fstype!~"tmpfs|vfat|overlay|squashfs",mountpoint!~"/boot.*"}))
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              queryType: expression
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 80
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          dashboardUid: libri
+          panelId: 5
+          noDataState: OK
+          execErrState: Error
+          for: 10m
+          annotations:
+            __dashboardUid__: libri
+            __panelId__: "5"
+            summary: Disk {{ $labels.host }} {{ $labels.mountpoint }} is {{ humanize $values.A.Value }}% full
+          labels:
+            severity: warning
+          isPaused: false
+          notification_settings:
+            receiver: email
+        - uid: dg209d5t906wwc
+          title: Disk full soon
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: grafanacloud-prom
+              model:
+                editorMode: code
+                expr: 100 * (1 - max by (host, mountpoint) (node_filesystem_avail_bytes{fstype!~"tmpfs|vfat|overlay|squashfs",mountpoint!~"/boot.*"}) / max by (host, mountpoint) (node_filesystem_size_bytes{fstype!~"tmpfs|vfat|overlay|squashfs",mountpoint!~"/boot.*"}))
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              queryType: expression
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 90
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          dashboardUid: libri
+          panelId: 5
+          noDataState: OK
+          execErrState: Error
+          for: 10m
+          annotations:
+            __dashboardUid__: libri
+            __panelId__: "5"
+            summary: Disk {{ $labels.host }} {{ $labels.mountpoint }} is {{ humanize $values.A.Value }}% full
+          labels:
+            severity: critical
+          isPaused: false
+          notification_settings:
+            receiver: email
+        - uid: bg209jfg0thxcb
+          title: Low memory
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: grafanacloud-prom
+              model:
+                editorMode: code
+                expr: 100 * max by (host) (node_memory_MemAvailable_bytes) / max by (host) (node_memory_MemTotal_bytes)
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              queryType: expression
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 10
+                        type: lt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          noDataState: OK
+          execErrState: Error
+          for: 10m
+          annotations:
+            summary: '{{ $labels.host }} has only {{ humanize $values.A.Value }}% memory available'
+          labels:
+            severity: critical
+          isPaused: false
+          notification_settings:
+            receiver: email
+        - uid: cg209mdzrecxsb
+          title: Container near memory limit
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: grafanacloud-prom
+              model:
+                editorMode: code
+                expr: 100 * max by (host, name) (container_memory_working_set_bytes{name!=""}) / max by (host, name) (container_spec_memory_limit_bytes{name!=""} > 0)
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              queryType: expression
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 90
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          noDataState: OK
+          execErrState: Error
+          for: 5m
+          annotations:
+            summary: '{{ $labels.name }} on {{ $labels.host }} uses {{ humanize $values.A.Value }}% of its mem_limit'
+          labels:
+            severity: warning
+          isPaused: false
+          notification_settings:
+            receiver: email
+        - uid: bg209plpr1xq8a
+          title: Host not reporting
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: grafanacloud-prom
+              model:
+                editorMode: code
+                expr: count by (host) (max_over_time(node_uname_info[1d])) unless count by (host) (node_uname_info)
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              queryType: expression
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          noDataState: OK
+          execErrState: Error
+          for: 5m
+          annotations:
+            summary: '{{ $labels.host }} stopped sending metrics'
+          labels:
+            severity: critical
+          isPaused: false
+          notification_settings:
+            receiver: email

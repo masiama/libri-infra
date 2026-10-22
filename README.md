@@ -122,6 +122,7 @@ Config files in [`monitoring/`](monitoring):
 - `api.alloy`: scrapes the API's private management port (`api:8081`).
 - `db.alloy`: Postgres and Redis exporters.
 - `dashboard.json`: the Grafana dashboard (Dashboards → New → Import).
+- `alerts.yaml`: the alert rules, exported from Grafana (Alert rules → More → Export).
 
 Alloy loads every `.alloy` file mounted into `/etc/alloy/libri`. On a host with only
 the API (or only the DB), remove the other file's mount line from the Alloy
