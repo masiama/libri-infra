@@ -186,7 +186,7 @@ groups:
               datasourceUid: grafanacloud-prom
               model:
                 editorMode: code
-                expr: 100 * max by (host, name) (container_memory_working_set_bytes{name!=""}) / max by (host, name) (container_spec_memory_limit_bytes{name!=""} > 0)
+                expr: 100 * max by (host, name) (container_memory_working_set_bytes{name!="", name!~".*alloy.*"}) / max by (host, name) (container_spec_memory_limit_bytes{name!="", name!~".*alloy.*"} > 0)
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
