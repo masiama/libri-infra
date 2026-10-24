@@ -23,7 +23,7 @@ services:
       - /run/containerd/containerd.sock:/run/containerd/containerd.sock:ro
       - /var/lib/docker:/var/lib/docker:ro
       - alloy_data:/var/lib/alloy/data
-    mem_limit: 150m
+    mem_limit: 250m
     cgroup: host
     restart: unless-stopped
 
