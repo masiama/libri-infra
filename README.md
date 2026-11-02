@@ -1,7 +1,8 @@
 # libri-infra
 
 Local development infrastructure for the Libri platform — brings up Postgres,
-Redis, the API, the crawler, and the admin frontend with a single command.
+Redis, the API and the crawler with a single command. Run the frontends
+(`libri-admin`, `libri-web`) with `pnpm dev` against it.
 
 ## Repositories
 
@@ -49,17 +50,12 @@ View logs:
 ```bash
 docker compose logs -f api
 docker compose logs -f crawler
-docker compose logs -f admin
 ```
 
 ## Accessing the app
 
-The admin frontend is available at `http://localhost:3000`. It proxies API
-requests under `/api/` to the `api` service internally — no separate API URL
-configuration is needed.
-
-The API is also directly exposed on `http://localhost:8080` if needed for
-debugging or external tools.
+The API is exposed on `http://localhost:8080`. Run a frontend with `pnpm dev`
+and set its `VITE_API_BASE` to that URL; Vite proxies `/api/v1` to it.
 
 ## Service reference
 
@@ -69,7 +65,6 @@ debugging or external tools.
 | redis    | `6379`    |                                                                                             |
 | api      | `8080`    |                                                                                             |
 | crawler  | —         | No exposed ports; communicates via Redis.                                                   |
-| admin    | `3000`    | Vue admin frontend, proxies `/api/` to `api`.                                               |
 
 Database credentials (`libri` / `libri` / db `libri`) are hardcoded in
 `docker-compose.yml` since both the database and its user only exist within this
@@ -89,11 +84,7 @@ See [`.env.example`](.env.example) for all configurable values:
 | ---------------------------- | ----------------------------------------------- | ---------- |
 | `API_TAG`                    | Image tag for `libri-api`                       | `latest`   |
 | `CRAWLER_TAG`                | Image tag for `libri-crawler`                   | `latest`   |
-| `ADMIN_TAG`                  | Image tag for `libri-admin`                     | `latest`   |
 | `CLERK_JWKS_URL`             | Clerk JWKS endpoint for auth verification (api) | _required_ |
-| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk publishable key (admin)                   | _required_ |
-| `VITE_CLERK_JWT_TEMPLATE`    | Clerk JWT template name (admin)                 | _required_ |
-| `VITE_SENTRY_DSN`            | Sentry DSN for error reporting (admin)          | _required_ |
 
 ## Monitoring
 
