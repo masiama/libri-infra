@@ -1,0 +1,23 @@
+// Loaded on the mac, which runs alloy natively.
+
+prometheus.remote_write "cloud" {
+  external_labels = { host = sys.env("ALLOY_HOST") }
+
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_PROMETHEUS_URL")
+
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_USER")
+      password = sys.env("GRAFANA_CLOUD_TOKEN")
+    }
+  }
+}
+
+prometheus.exporter.unix "host" {}
+
+prometheus.scrape "host" {
+  targets         = prometheus.exporter.unix.host.targets
+  scrape_interval = "60s"
+  scrape_timeout  = "30s"
+  forward_to      = [prometheus.remote_write.cloud.receiver]
+}
