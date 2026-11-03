@@ -11,7 +11,7 @@ prometheus.scrape "postgres" {
 }
 
 prometheus.exporter.redis "redis" {
-  redis_addr     = "redis:6379"
+  redis_addr     = coalesce(sys.env("REDIS_ADDR"), "redis:6379")
   redis_password = sys.env("REDIS_PASSWORD")
 }
 
