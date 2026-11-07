@@ -88,36 +88,28 @@ See [`.env.example`](.env.example) for all configurable values:
 
 ## Monitoring
 
-Grafana Alloy collects host, container, API, Postgres and Redis metrics and
-pushes them to Grafana Cloud (free tier). The plan and dashboard design are in
-`docs/monitoring.md` in the parent workspace.
+Grafana Alloy collects host, API, Postgres and Redis metrics and pushes them to
+Grafana Cloud (free tier). It runs natively on macOS (Homebrew), not in Docker:
+inside Docker it would see OrbStack's VM, not the Mac and its disks. The plan
+and dashboard design are in `docs/monitoring.md` in the parent workspace.
 
 1. Fill the monitoring variables in `.env` (see [`.env.example`](.env.example)):
 
-   | Variable                       | Description                                                      |
-   | ------------------------------ | ---------------------------------------------------------------- |
-   | `ALLOY_HOST`                   | `host` label on every series (`oracle-app`, `oracle-db`, `mac`) |
-   | `GRAFANA_CLOUD_PROMETHEUS_URL` | Prometheus remote-write URL of the Grafana Cloud stack           |
-   | `GRAFANA_CLOUD_USER`           | Prometheus user ID of the stack                                  |
-   | `GRAFANA_CLOUD_TOKEN`          | Access policy token with `metrics:write`                         |
+   | Variable                       | Description                                            |
+   | ------------------------------ | ------------------------------------------------------ |
+   | `ALLOY_HOST`                   | `host` label on every series                           |
+   | `GRAFANA_CLOUD_PROMETHEUS_URL` | Prometheus remote-write URL of the Grafana Cloud stack |
+   | `GRAFANA_CLOUD_USER`           | Prometheus user ID of the stack                        |
+   | `GRAFANA_CLOUD_TOKEN`          | Access policy token with `metrics:write`               |
 
-2. Start Alloy next to the stack:
-
-   ```bash
-   docker compose -f docker-compose.yml -f docker-compose.alloy.yml up -d
-   ```
+2. Run `monitoring/run-mac.sh` (the LaunchAgent `com.libri.alloy.plist` does this on login).
 
 Config files in [`monitoring/`](monitoring):
 
-- `common.alloy`: host and container metrics, the Grafana Cloud push. Every host.
-- `api.alloy`: scrapes the API's private management port (`api:8081`).
+- `mac.alloy`: host metrics and the Grafana Cloud push.
+- `api.alloy`: scrapes the API's private management port (`127.0.0.1:8081`).
 - `db.alloy`: Postgres and Redis exporters.
 - `dashboard.json`: the Grafana dashboard (Dashboards → New → Import).
 - `alerts.yaml`: the alert rules, exported from Grafana (Alert rules → More → Export).
 
-Alloy loads every `.alloy` file mounted into `/etc/alloy/libri`. On a host with only
-the API (or only the DB), remove the other file's mount line from the Alloy
-service.
-
-On macOS, run Alloy natively (Homebrew), not in Docker: inside Docker it sees
-OrbStack's VM, not the Mac and its disks.
+There are no per-container metrics: cAdvisor does not work with OrbStack.
