@@ -13,7 +13,11 @@ prometheus.remote_write "cloud" {
   }
 }
 
-prometheus.exporter.unix "host" {}
+prometheus.exporter.unix "host" {
+  textfile {
+    directory = sys.env("HOME") + "/.local/share/libri-alloy/textfile"
+  }
+}
 
 prometheus.scrape "host" {
   targets         = prometheus.exporter.unix.host.targets
